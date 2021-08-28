@@ -1,6 +1,24 @@
 #include "SGlib.h"
 #include "PSGlib.h"
 
+// 背景
+const unsigned char bgTileData[] = {
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+};
+#define bgTileDataSize 8
+const unsigned char bgTileMapData[] = {
+        0x00
+};
+#define bgTileMapDataSize 1
+#define bgTileMapDataWidth 1
+#define bgTileMapDataHeight 1
+
+const unsigned char bgColourData[] = {
+        0x02,0x02,0x02,0x02,0x02,0x02,0x02,0x02,
+};
+#define bgColourDataSize 8
+// 背景 ここまで
+
 // コンバーターから出力されたソースコード
 const unsigned char pitcher1TileData[] = {
         0x07,0x08,0x08,0x3F,0x0A,0x0A,0x04,0x0B, 0xE0,0x10,0x10,0xF0,0x50,0x50,0x20,0xD0, 0x10,0x34,0x4F,0x48,0x3B,0x0A,0x1E,0x1E, 0x08,0x2C,0xF2,0x12,0xDC,0x50,0x78,0x78,
@@ -10,7 +28,7 @@ const unsigned char pitcher1TileData[] = {
 const unsigned char pitcher1TileMapData[] = {
         0x01,0x02,0x03,0x04,
 };
-#define pitcher1TileMapDataSize 5
+#define pitcher1TileMapDataSize 4
 #define pitcher1TileMapDataWidth 2
 #define pitcher1TileMapDataHeight 2
 
@@ -24,33 +42,27 @@ void main (void)
 {
     SG_setSpriteMode (SG_SPRITEMODE_LARGE);
 
-    unsigned int tilefrom = 1;  // 開始位置
+    unsigned int tilefrom = 0;  // 開始位置
 
     // VRAM0000番台に書き込む
     // Tileの書き込み
-    SG_loadTilePatterns(
-        pitcher1TileData,
-        tilefrom,
-        pitcher1TileDataSize
-    );
-    SG_loadTilePatterns(
-        pitcher1TileData,
-        tilefrom+256,
-        pitcher1TileDataSize
-    );
+    for ( int i = 0; i < 3; i++ ){
+        SG_loadTilePatterns(
+            bgTileData,
+            tilefrom+256*i,
+            bgTileDataSize
+        );
+    }
 
     // VRAM2000番台に書き込む
     // 色の書き込み
-    SG_loadTileColours(
-        pitcher1ColourData,
-        tilefrom,
-        pitcher1ColourDataSize
-    );
-    SG_loadTileColours(
-        pitcher1ColourData,
-        tilefrom+256,
-        pitcher1ColourDataSize
-    );
+    for ( int i = 0; i < 3; i++ ){
+        SG_loadTileColours(
+            bgColourData,
+            tilefrom+256*i,
+            bgColourDataSize
+        );
+    }
 
     // VRAM1800番台に書き込む
     // タイルマップの書き込み
@@ -59,9 +71,9 @@ void main (void)
     SG_loadTileMapArea(
 		x,
 		y,
-		pitcher1TileMapData,
-		pitcher1TileMapDataWidth,
-		pitcher1TileMapDataHeight
+		bgTileMapData,
+		bgTileMapDataWidth,
+		bgTileMapDataHeight
     );
 
     // ディスプレイをオンにします
