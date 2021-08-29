@@ -20,13 +20,33 @@ const unsigned char bgColourData[] = {
 // 背景 ここまで
 
 // ピッチャー
-const unsigned char pitcher1TileData[] = {
+const unsigned char pitcherTileData[] = {
         0x07,0x08,0x08,0x3F,0x0A,0x0A,0x04,0x0B,
         0x10,0x34,0x4F,0x48,0x3B,0x0A,0x1E,0x1E,
         0xE0,0x10,0x10,0xF0,0x50,0x50,0x20,0xD0,
         0x08,0x2C,0xF2,0x12,0xDC,0x50,0x78,0x78,
+
+        0x07,0x08,0x38,0x5F,0x4A,0x3A,0x24,0x23,
+        0x20,0x10,0x0F,0x08,0x0B,0x0A,0x1E,0x1E,
+        0xE0,0x10,0x16,0xF9,0x59,0x56,0x24,0xC4,
+        0x04,0x08,0xF0,0x10,0xD0,0x50,0x78,0x78,
+
+        0x07,0x08,0x08,0x1F,0x0A,0x1A,0x24,0x27,
+        0x18,0x04,0x3F,0x20,0x2F,0x79,0x7B,0x03,
+        0xE0,0x10,0x10,0xF0,0x50,0x50,0x20,0xC0,
+        0x40,0x40,0xC0,0x40,0x40,0x40,0xC0,0xC0,
+
+        0x60,0x91,0x92,0x7A,0x27,0x12,0x0A,0x05,
+        0x04,0x04,0x07,0x04,0x0D,0x0D,0x0E,0x00,
+        0x00,0xF8,0x04,0x04,0xFE,0x94,0x94,0x08,
+        0xF8,0x24,0xE4,0x38,0xA0,0xA0,0xF0,0xF0,
+
+        0x00,0x00,0x01,0x02,0x02,0x03,0x06,0x0A,
+        0x1B,0x1E,0x19,0x1C,0x03,0x01,0x01,0x01,
+        0x00,0x00,0xF8,0x04,0x04,0xFE,0x94,0x94,
+        0x08,0xF0,0x10,0xC8,0x66,0x59,0xE9,0xE6,
 };
-#define pitcher1TileDataSize 32
+#define pitcherTileDataSize 32*5
 // ピッチャー ここまで
 
 // バッター
@@ -54,12 +74,12 @@ const unsigned char batter1TileData[] = {
 #define batter1TileDataSize 8*16
 // バッター ここまで
 
-// コンバートテスト
-const unsigned char convertTileData[] = {
-        0x00,0x00,0x01,0x03,0x0F,0x1F,0x01,0x01, 0x01,0x01,0x01,0x01,0x1F,0x3F,0x00,0x00, 0x00,0x00,0x80,0x80,0x80,0x80,0x80,0x80, 0x80,0x80,0x80,0x80,0xF8,0xFC,0x00,0x00,
+// ボール
+const unsigned char ballTileData[] = {
+        0x3C,0x7E,0xFF,0xFF,0xFF,0xFF,0x7E,0x3C,
 };
-#define convertTileDataSize 32
-// コンバートテスト ここまで
+#define ballTileDataSize 8
+// ボール ここまで
 
 
 void main (void)
@@ -108,37 +128,47 @@ void main (void)
     unsigned char batterX = 256 / 2 - 16 / 2;
     unsigned char batterY = 192 - 24;
 
+    // ボール
+    unsigned char ballX = 256 / 2 - 16 / 2;
+    unsigned char ballY = 16;
+
     // VRAM3800番台に書き込む
     // スプライトの書き込み
     
     unsigned int spriteSize = 0;
 
-    // ピッチャー 4バイト
+    // ピッチャー 4バイト x 5パターン
     tilefrom = spriteSize;  // 開始位置
-    spriteSize += 4;
+    unsigned int pitcherTileAddress = tilefrom;
     SG_loadSpritePatterns(
-        pitcher1TileData,
+        pitcherTileData,
         tilefrom,
-        pitcher1TileDataSize
+        pitcherTileDataSize
     );
+    spriteSize += 4 * 5;
     
     // バッター 16バイト
     tilefrom = spriteSize;  // 開始位置
-    spriteSize += 16;
+    unsigned int batterTileAddress = tilefrom;
     SG_loadSpritePatterns(
         batter1TileData,
         tilefrom,
         batter1TileDataSize
     );
+    spriteSize += 16;
 
-    // コンバートテスト 4バイト
+    // ボール 1バイト
     tilefrom = spriteSize;  // 開始位置
-    spriteSize += 4;
+    unsigned int ballTileAddress = tilefrom;
     SG_loadSpritePatterns(
-        convertTileData,
+        ballTileData,
         tilefrom,
-        convertTileDataSize
+        ballTileDataSize
     );
+    spriteSize += 1;
+
+    unsigned char isPitching = 0;
+    unsigned char pitchingCount = 0;
 
     // ディスプレイをオンにします
     SG_displayOn(); 
@@ -146,6 +176,7 @@ void main (void)
     while (1) {
         // ゲームループ
 
+        /*
         if ( SG_getKeysHeld () == PORT_A_KEY_LEFT ){
             pitcherX--;
         }
@@ -159,15 +190,39 @@ void main (void)
         if ( SG_getKeysHeld () == PORT_B_KEY_RIGHT ){
             batterX++;
         }
+        */
+
+        // １ボタンを押したら、ボールを投げる
+        if ( SG_getKeysPressed () == PORT_A_KEY_1 ){
+            isPitching = 1;
+        }
+
+        if ( isPitching == 1 ) {
+            pitchingCount++;
+            if ( pitchingCount > 40 ) {
+                pitchingCount = 40;
+            }
+            pitcherTileAddress = 0x04 * ( pitchingCount / 10 );
+        }
+        
 
         // スプライトを表示する
         SG_initSprites ();
-        SG_addSprite (pitcherX  , pitcherY  , 0x00, SG_COLOR_WHITE);	// ピッチャー
-        SG_addSprite (batterX   , batterY   , 0x04, SG_COLOR_WHITE);	// バッター
-        SG_addSprite (batterX   , batterY+16, 0x08, SG_COLOR_WHITE);	// バッター
-        SG_addSprite (batterX+16, batterY   , 0x0C, SG_COLOR_WHITE);	// バッター
-        SG_addSprite (batterX+16, batterY+16, 0x10, SG_COLOR_WHITE);	// バッター
-        SG_addSprite (100, 100, 0x14, SG_COLOR_WHITE);	// コンバートテスト
+        SG_addSprite (pitcherX  , pitcherY  , pitcherTileAddress      , SG_COLOR_WHITE);	// ピッチャー
+        SG_addSprite (batterX   , batterY   , batterTileAddress + 0x00, SG_COLOR_WHITE);	// バッター
+        SG_addSprite (batterX   , batterY+16, batterTileAddress + 0x04, SG_COLOR_WHITE);	// バッター
+        SG_addSprite (batterX+16, batterY   , batterTileAddress + 0x08, SG_COLOR_WHITE);	// バッター
+        SG_addSprite (batterX+16, batterY+16, batterTileAddress + 0x0C, SG_COLOR_WHITE);	// バッター
+        if ( pitchingCount == 40 ) {
+            SG_addSprite (ballX, ballY, ballTileAddress, SG_COLOR_WHITE);	// ボール
+            ballY+=2;
+            if ( ballY >= 192 ) {
+                ballY = 16;
+                pitchingCount = 0;
+                isPitching = 0;
+                pitcherTileAddress = 0x00; // TODO 変わる可能性あり
+            }
+        }
         SG_finalizeSprites ();
         SG_copySpritestoSAT ();
 
