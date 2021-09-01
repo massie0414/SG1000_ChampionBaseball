@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "SGlib.h"
 #include "PSGlib.h"
 
@@ -175,8 +177,8 @@ void main (void)
     unsigned char batterY = 192 - 24;
 
     // ボール
-    unsigned char ballX = 256 / 2 - 16 / 2;
-    unsigned char ballY = 16;
+    float ballX = (float)(256 / 2 - 16 / 2);
+    float ballY = (float)16;
 
     // VRAM3800番台に書き込む
     // スプライトの書き込み
@@ -249,8 +251,8 @@ void main (void)
     unsigned char isBatting = 0;
     unsigned char battingCount = 0;
 
-    signed char ballSpeedY = 2;
-    signed char ballSpeedX = 0;
+    float ballSpeedY = 2;
+    float ballSpeedX = 0;
 
     // ディスプレイをオンにします
     SG_displayOn(); 
@@ -299,9 +301,10 @@ void main (void)
             battingCount++;
             if ( battingCount == 10 ) {
                 // ボールの位置が一定の場所なら当たったことにする
-                if ( 164 <= ballY && ballY <= 180 ) {
-                    ballSpeedY = -2;
-                    ballSpeedX = 172 - ballY;
+                if ( 156 <= ballY && ballY <= 188 ) {
+                    double radian = (172 - ballY) / 8;
+                    ballSpeedX = sinf(radian) * 2;
+                    ballSpeedY = -cosf(radian) * 2;
                 }
             }
             if ( battingCount >= 25 ) {
@@ -321,8 +324,8 @@ void main (void)
 
         // ボール
         if ( pitchingCount == 40 ) {
-            SG_addSprite (ballX, ballY, ballTileAddress1, SG_COLOR_BLACK);	// ボール
-            SG_addSprite (ballX, ballY, ballTileAddress2, SG_COLOR_WHITE);	// ボール(２色目)
+            SG_addSprite ((int)ballX, ballY, ballTileAddress1, SG_COLOR_BLACK);	// ボール
+            SG_addSprite ((int)ballX, ballY, ballTileAddress2, SG_COLOR_WHITE);	// ボール(２色目)
             ballX += ballSpeedX;
             ballY += ballSpeedY;
             if ( ballY >= 192 || ballY < 16 || 248 < ballX  || ballX < 16 ) {
