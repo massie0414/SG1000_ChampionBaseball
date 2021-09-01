@@ -249,7 +249,8 @@ void main (void)
     unsigned char isBatting = 0;
     unsigned char battingCount = 0;
 
-    signed char ballSpeed = 2;
+    signed char ballSpeedY = 2;
+    signed char ballSpeedX = 0;
 
     // ディスプレイをオンにします
     SG_displayOn(); 
@@ -297,7 +298,11 @@ void main (void)
         if ( isBatting == 1 ) {
             battingCount++;
             if ( battingCount == 10 ) {
-                ballSpeed = -2;
+                // ボールの位置が一定の場所なら当たったことにする
+                if ( 164 <= ballY && ballY <= 180 ) {
+                    ballSpeedY = -2;
+                    ballSpeedX = 172 - ballY;
+                }
             }
             if ( battingCount >= 25 ) {
                 battingCount = 0;
@@ -318,10 +323,13 @@ void main (void)
         if ( pitchingCount == 40 ) {
             SG_addSprite (ballX, ballY, ballTileAddress1, SG_COLOR_BLACK);	// ボール
             SG_addSprite (ballX, ballY, ballTileAddress2, SG_COLOR_WHITE);	// ボール(２色目)
-            ballY += ballSpeed;
-            if ( ballY >= 192 || ballY < 16 ) {
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+            if ( ballY >= 192 || ballY < 16 || 248 < ballX  || ballX < 16 ) {
+                ballX = 256 / 2 - 16 / 2;
                 ballY = 16;
-                ballSpeed = 2;
+                ballSpeedX = 0;
+                ballSpeedY = 2;
                 pitchingCount = 0;
                 isPitching = 0;
                 pitcherTileAddress1 = 0x00; // TODO 変わる可能性あり
