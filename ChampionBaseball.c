@@ -302,7 +302,7 @@ void main (void)
             if ( battingCount == 10 ) {
                 // ボールの位置が一定の場所なら当たったことにする
                 if ( 156 <= ballY && ballY <= 188 ) {
-                    double radian = (172 - ballY) / 8;
+                    double radian = (172 - ballY) / 8;  // TODO ここは適当
                     ballSpeedX = sinf(radian) * 2;
                     ballSpeedY = -cosf(radian) * 2;
                 }
