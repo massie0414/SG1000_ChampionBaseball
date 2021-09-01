@@ -249,6 +249,8 @@ void main (void)
     unsigned char isBatting = 0;
     unsigned char battingCount = 0;
 
+    signed char ballSpeed = 2;
+
     // ディスプレイをオンにします
     SG_displayOn(); 
 
@@ -256,6 +258,7 @@ void main (void)
         // ゲームループ
 
         /*
+        // ピッチャーを左右に移動
         if ( SG_getKeysHeld () == PORT_A_KEY_LEFT ){
             pitcherX--;
         }
@@ -263,6 +266,7 @@ void main (void)
             pitcherX++;
         }
 
+        // バッターを左右に移動
         if ( SG_getKeysHeld () == PORT_B_KEY_LEFT ){
             batterX--;
         }
@@ -292,6 +296,9 @@ void main (void)
 
         if ( isBatting == 1 ) {
             battingCount++;
+            if ( battingCount == 10 ) {
+                ballSpeed = -2;
+            }
             if ( battingCount >= 25 ) {
                 battingCount = 0;
                 isBatting = 0;
@@ -311,9 +318,10 @@ void main (void)
         if ( pitchingCount == 40 ) {
             SG_addSprite (ballX, ballY, ballTileAddress1, SG_COLOR_BLACK);	// ボール
             SG_addSprite (ballX, ballY, ballTileAddress2, SG_COLOR_WHITE);	// ボール(２色目)
-            ballY+=2;
-            if ( ballY >= 192 ) {
+            ballY += ballSpeed;
+            if ( ballY >= 192 || ballY < 16 ) {
                 ballY = 16;
+                ballSpeed = 2;
                 pitchingCount = 0;
                 isPitching = 0;
                 pitcherTileAddress1 = 0x00; // TODO 変わる可能性あり
@@ -332,8 +340,6 @@ void main (void)
         SG_addSprite (batterX+16, batterY   , batterTileAddress2 + 0x08, SG_COLOR_WHITE);	// バッター(２色目)
         SG_addSprite (batterX+16, batterY+16, batterTileAddress2 + 0x0C, SG_COLOR_WHITE);	// バッター(２色目)
         
-
-
         SG_finalizeSprites ();
         SG_copySpritestoSAT ();
 
