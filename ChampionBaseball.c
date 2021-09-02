@@ -263,6 +263,9 @@ const unsigned char ballTileMask[] = {
         0x3C,0x7E,0xFF,0xFF,0xFF,0xFF,0x7E,0x3C,
 };
 #define ballTileDataSize 8
+
+#define BALL_X (256 / 2 - 16 / 2)
+#define BALL_Y 16
 // ボール ここまで
 
 
@@ -313,8 +316,8 @@ void main (void)
     unsigned char batterY = BATTER_Y;
 
     // ボール
-    float ballX = (float)(256 / 2 - 16 / 2);
-    float ballY = (float)16;
+    float ballX = BALL_X;
+    float ballY = BALL_Y;
 
     // VRAM3800番台に書き込む
     // スプライトの書き込み
@@ -387,8 +390,9 @@ void main (void)
     unsigned char isBatting = 0;
     unsigned char battingCount = 0;
 
-    float ballSpeedY = 2;
     float ballSpeedX = 0;
+    float ballSpeedX2 = 0;  // 変化球の時に使用
+    float ballSpeedY = 2;
 
     // ディスプレイをオンにします
     SG_displayOn(); 
@@ -396,27 +400,20 @@ void main (void)
     while (1) {
         // ゲームループ
 
-        /*
-        // ピッチャーを左右に移動
-        if ( SG_getKeysHeld () == PORT_A_KEY_LEFT ){
-            pitcherX--;
-        }
-        if ( SG_getKeysHeld () == PORT_A_KEY_RIGHT ){
-            pitcherX++;
-        }
-
-        // バッターを左右に移動
-        if ( SG_getKeysHeld () == PORT_B_KEY_LEFT ){
-            batterX--;
-        }
-        if ( SG_getKeysHeld () == PORT_B_KEY_RIGHT ){
-            batterX++;
-        }
-        */
-
         // １PADの１ボタンを押したら、ボールを投げる
-        if ( SG_getKeysPressed () == PORT_A_KEY_1 ){
+        if ( isPitching == 0 && SG_getKeysPressed () == PORT_A_KEY_1 ){
             isPitching = 1;
+            ballSpeedX = 0;
+            ballSpeedX2 = 0;  // 変化球の時に使用
+            ballSpeedY = 3;
+        }
+
+        if ( isPitching == 0 && SG_getKeysPressed () == PORT_A_KEY_2 ){
+            // カーブ
+            isPitching = 1;
+            ballSpeedX = -0.5f;
+            ballSpeedX2 = 0.015f;  // 変化球の時に使用
+            ballSpeedY = 2;
         }
 
         if ( isPitching == 1 ) {
@@ -439,8 +436,9 @@ void main (void)
                 // ボールの位置が一定の場所なら当たったことにする
                 if ( 148 <= ballY && ballY <= 180 ) {
                     double radian = (164 - ballY) / 8;  // TODO ここは適当
-                    ballSpeedX = sinf(radian) * 2;
-                    ballSpeedY = -cosf(radian) * 2;
+                    ballSpeedX = sinf(radian) * 3;
+                    ballSpeedX2 = 0;
+                    ballSpeedY = -cosf(radian) * 3;
                 }
             }
             if ( battingCount >= 25 ) {
@@ -462,6 +460,7 @@ void main (void)
         if ( pitchingCount == 40 ) {
             SG_addSprite ((int)ballX, ballY, ballTileAddress1, SG_COLOR_BLACK);	// ボール
             SG_addSprite ((int)ballX, ballY, ballTileAddress2, SG_COLOR_WHITE);	// ボール(２色目)
+            ballSpeedX += ballSpeedX2;
             ballX += ballSpeedX;
             ballY += ballSpeedY;
             if ( ballY >= 192 || ballY < 16 || 248 < ballX  || ballX < 16 ) {
