@@ -249,6 +249,9 @@ const unsigned char batterTileMask[] = {
 };
 
 #define batterTileDataSize 8 * 16 * 5
+
+#define BATTER_X (256 / 2 - 4)  // TODO 左バッターの場合
+#define BATTER_Y (192 - 32)
 // バッター ここまで
 
 // ボール
@@ -306,8 +309,8 @@ void main (void)
     unsigned char pitcherY = 0;
     
     // バッター
-    unsigned char batterX = 256 / 2 - 16 / 2;
-    unsigned char batterY = 192 - 24;
+    unsigned char batterX = BATTER_X;
+    unsigned char batterY = BATTER_Y;
 
     // ボール
     float ballX = (float)(256 / 2 - 16 / 2);
@@ -434,8 +437,8 @@ void main (void)
             battingCount++;
             if ( battingCount == 10 ) {
                 // ボールの位置が一定の場所なら当たったことにする
-                if ( 156 <= ballY && ballY <= 188 ) {
-                    double radian = (172 - ballY) / 8;  // TODO ここは適当
+                if ( 148 <= ballY && ballY <= 180 ) {
+                    double radian = (164 - ballY) / 8;  // TODO ここは適当
                     ballSpeedX = sinf(radian) * 2;
                     ballSpeedY = -cosf(radian) * 2;
                 }
